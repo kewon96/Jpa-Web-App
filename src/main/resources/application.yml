@@ -1,0 +1,27 @@
+## http://mageddo.com/tools/yaml-converter
+
+server:
+  port: 3030
+
+## database 접속 설정
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5500/jpa_web_app
+    username: admin
+    password: admin
+  jpa:
+    properties:
+      hibernate:
+#        show_sql: true System.out.print로 출력하기 때문에 사용하지않음
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: 'true'
+    hibernate:
+      ddl-auto: update
+
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    org.hibernate.SQL: debug # logger로 출력
