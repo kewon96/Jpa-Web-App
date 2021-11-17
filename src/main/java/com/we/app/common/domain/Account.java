@@ -64,8 +64,6 @@ public class Account {
     })
     private Notify studyUpdate;
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
