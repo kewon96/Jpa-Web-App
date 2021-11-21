@@ -19,8 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
         // @formatter:off
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost:3000",
-                        "http://localhost:3030")
+                        "http://localhost:3000")
                 .exposedHeaders("jwt-token")
         ;
     }
