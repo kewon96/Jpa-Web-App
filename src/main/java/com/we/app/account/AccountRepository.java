@@ -1,6 +1,6 @@
 package com.we.app.account;
 
-import com.we.app.common.domain.Account;
+import com.we.app.account.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 

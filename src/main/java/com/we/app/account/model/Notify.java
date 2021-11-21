@@ -1,4 +1,4 @@
-package com.we.app.common.domain;
+package com.we.app.account.model;
 
 import lombok.Getter;
 import lombok.Setter;

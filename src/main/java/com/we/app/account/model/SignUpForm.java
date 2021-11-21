@@ -1,4 +1,4 @@
-package com.we.app.common.domain;
+package com.we.app.account.model;
 
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
