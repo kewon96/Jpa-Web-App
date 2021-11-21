@@ -29,19 +29,25 @@
             </a>
           </div>
         </form>
-        <form action="#" class="sign-up-form">
+        <form action="#" class="sign-up-form" @submit.prevent="signUpUser">
           <h2 class="title">Sign up</h2>
           <div class="input-field">
             <i class="fas fa-user"></i>
-            <input type="text" placeholder="Username" />
+            <input type="text" v-model="signUpForm.username" @blur="checkValidation('username')" placeholder="Username" />
+            <div></div>
+            <span>{{ validateTxt.username }}</span>
           </div>
           <div class="input-field">
             <i class="fas fa-envelope"></i>
-            <input type="email" placeholder="Email" />
+            <input type="email" v-model="signUpForm.email" @blur="checkValidation('email')" placeholder="Email" />
+            <div></div>
+            <span>{{ validateTxt.email }}</span>
           </div>
           <div class="input-field">
             <i class="fas fa-lock"></i>
-            <input type="password" placeholder="Password" />
+            <input type="password" v-model="signUpForm.password" @blur="checkValidation('password')" placeholder="Password" />
+            <div></div>
+            <span>{{ validateTxt.password }}</span>
           </div>
           <input type="submit" class="btn" value="Sign up" />
           <p class="social-text">Or Sign up with social platforms</p>
@@ -96,12 +102,80 @@
 
 <script setup lang="ts">
 
-import {ref} from "vue";
+import {reactive, ref} from "vue";
+import http from "../../../util/http";
 
-const showSignUpMode = ref(false);
+interface SignUpForm {
+  [index: string]: string;
+  username: string;
+  email: string;
+  password: string;
+}
 
+const showSignUpMode = ref<Boolean>(false);
+const validateTxt = reactive<SignUpForm>({
+  username: '',
+  email: '',
+  password: ''
+})
+
+const signUpForm = reactive<SignUpForm>({
+  username: '',
+  email: '',
+  password: ''
+})
+
+function checkValidation(target: string) {
+  const tarValue = signUpForm[target];
+  if(!tarValue) {
+    validateTxt[target] = '내용을 입력해주세요.';
+  }
+
+  let reg: RegExp = new RegExp('');
+  let txt!: string;
+
+  // switch (target) {
+  //   case 'username': {
+  //     reg = /^[가-힣]{2,4}|[a-zA-Z]{2,15}\s[a-zA-Z]{2,10}$/;
+  //     txt = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+  //     break;
+  //   }
+  //
+  //   case 'email': {
+  //     reg =  /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/;
+  //     txt = '이메일을 다시 확인해주세요.';
+  //     break;
+  //   }
+  //
+  //   case 'password': { // 비밀번호
+  //     reg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/;
+  //     txt = '8자 이상의 영문자와 숫자의 조합이어야합니다.';
+  //     break;
+  //   }
+  // }
+
+  if(!reg.test(tarValue)) {
+    validateTxt[target] = txt;
+  } else {
+    validateTxt[target] = '';
+  }
+}
+
+/** SignIn <---> SignUp 이동 */
 function movePage() {
   showSignUpMode.value = !showSignUpMode.value;
+}
+
+function signUpUser() {
+  // 한 항목이라도 안내문구가 있으면 submit 막음
+  if(Object.values(validateTxt).some((v) => v)) return false;
+
+  const isCreated = http.post('/account/signup/submit', signUpForm);
+
+  console.log(isCreated)
+
+  return false;
+
 }
 
 </script>
@@ -179,7 +253,7 @@ form.sign-in-form {
   max-width: 380px;
   width: 100%;
   background-color: #f0f0f0;
-  margin: 10px 0;
+  margin: 20px 0;
   height: 55px;
   border-radius: 55px;
   display: grid;
@@ -204,6 +278,11 @@ form.sign-in-form {
   font-weight: 600;
   font-size: 1.1rem;
   color: #333;
+}
+
+.input-field span {
+  color: #eb8c31;
+  font-size: 12px;
 }
 
 .input-field input::placeholder {

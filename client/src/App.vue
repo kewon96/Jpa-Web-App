@@ -1,7 +1,5 @@
 <template>
   <router-view />
-<!--  <router-link to="/" />-->
-<!--  <AuthComponent />-->
 </template>
 
 <script setup lang="ts">
