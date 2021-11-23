@@ -1,11 +1,11 @@
-package com.we.app.account;
+package com.we.app.member;
 
-import com.we.app.account.model.Account;
+import com.we.app.member.model.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
-public interface AccountRepository extends JpaRepository<Account, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String email);

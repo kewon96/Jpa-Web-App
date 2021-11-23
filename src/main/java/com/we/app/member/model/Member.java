@@ -1,4 +1,4 @@
-package com.we.app.account.model;
+package com.we.app.member.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -6,11 +6,12 @@ import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Builder @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-public class Account {
+public class Member {
 
     @Id @GeneratedValue
     private Long id;
@@ -68,12 +69,16 @@ public class Account {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Account account = (Account) o;
-        return id != null && Objects.equals(id, account.id);
+        Member member = (Member) o;
+        return id != null && Objects.equals(id, member.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public void generateEmailCheckToken() {
+        this.emailCheckToken = UUID.randomUUID().toString();
     }
 }

@@ -33,19 +33,19 @@
           <h2 class="title">Sign up</h2>
           <div class="input-field">
             <i class="fas fa-user"></i>
-            <input type="text" v-model="signUpForm.username" @blur="checkValidation('username')" placeholder="Username" />
+            <input type="text" v-model="joinMember.username" @blur="validateUsername" placeholder="Username" />
             <div></div>
             <span>{{ validateTxt.username }}</span>
           </div>
           <div class="input-field">
             <i class="fas fa-envelope"></i>
-            <input type="email" v-model="signUpForm.email" @blur="checkValidation('email')" placeholder="Email" />
+            <input type="email" v-model="joinMember.email" @blur="validateEmail" placeholder="Email" />
             <div></div>
             <span>{{ validateTxt.email }}</span>
           </div>
           <div class="input-field">
             <i class="fas fa-lock"></i>
-            <input type="password" v-model="signUpForm.password" @blur="checkValidation('password')" placeholder="Password" />
+            <input type="password" v-model="joinMember.password" @blur="validatePassword" placeholder="Password" />
             <div></div>
             <span>{{ validateTxt.password }}</span>
           </div>
@@ -119,45 +119,62 @@ const validateTxt = reactive<SignUpForm>({
   password: ''
 })
 
-const signUpForm = reactive<SignUpForm>({
+const joinMember = reactive<SignUpForm>({
   username: '',
   email: '',
   password: ''
 })
 
-function checkValidation(target: string) {
-  const tarValue = signUpForm[target];
-  if(!tarValue) {
-    validateTxt[target] = '내용을 입력해주세요.';
+/** 유저이름 validator */
+function validateUsername() {
+  const { username } = joinMember;
+
+  if(!username) {
+    validateTxt.username = '내용을 입력해주세요.'
+    return;
   }
 
-  let reg: RegExp = new RegExp('');
-  let txt!: string;
-
-  // switch (target) {
-  //   case 'username': {
-  //     reg = /^[가-힣]{2,4}|[a-zA-Z]{2,15}\s[a-zA-Z]{2,10}$/;
-  //     txt = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
-  //     break;
-  //   }
-  //
-  //   case 'email': {
-  //     reg =  /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/;
-  //     txt = '이메일을 다시 확인해주세요.';
-  //     break;
-  //   }
-  //
-  //   case 'password': { // 비밀번호
-  //     reg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/;
-  //     txt = '8자 이상의 영문자와 숫자의 조합이어야합니다.';
-  //     break;
-  //   }
-  // }
-
-  if(!reg.test(tarValue)) {
-    validateTxt[target] = txt;
+  if(/^[가-힣]{2,4}|[a-zA-Z]{2,15}\s[a-zA-Z]{2,10}$/.test(username)) {
+    validateTxt.username = '';
   } else {
-    validateTxt[target] = '';
+    validateTxt.username = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+    return;
+  }
+
+  const isDupl = http.post('/member/check/dupl/username', {username: username});
+  console.log(isDupl)
+
+}
+
+/** 이메일 validator */
+function validateEmail() {
+  const { email } = joinMember;
+
+  if(!email) {
+    validateTxt.email = '내용을 입력해주세요.'
+    return;
+  }
+
+  if(!/^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/.test(email)) {
+    validateTxt.email = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+  } else {
+    validateTxt.email = '';
+  }
+}
+
+/** 비밀번호 validator */
+function validatePassword() {
+  const { email } = joinMember;
+
+  if(!email) {
+    validateTxt.email = '내용을 입력해주세요.'
+    return;
+  }
+
+  if(!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/.test(email)) {
+    validateTxt.email = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+  } else {
+    validateTxt.email = '';
   }
 }
 
@@ -170,7 +187,7 @@ function signUpUser() {
   // 한 항목이라도 안내문구가 있으면 submit 막음
   if(Object.values(validateTxt).some((v) => v)) return false;
 
-  const isCreated = http.post('/account/signup/submit', signUpForm);
+  const isCreated = http.post('/member/signup/submit', joinMember);
 
   console.log(isCreated)
 

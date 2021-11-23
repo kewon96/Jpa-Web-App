@@ -21,7 +21,11 @@ spring:
       ddl-auto: update
 
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
+  jackson:
+    deserialization:
+      fail_on_unknown_properties: true
+  profiles:
+    active: 'local'
 logging:
   level:
     org.hibernate.SQL: debug # logger로 출력

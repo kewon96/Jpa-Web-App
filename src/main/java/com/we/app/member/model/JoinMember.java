@@ -1,4 +1,4 @@
-package com.we.app.account.model;
+package com.we.app.member.model;
 
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignUpForm {
+public class JoinMember {
 
     @NotBlank
     @Length(min = 2, max = 10)

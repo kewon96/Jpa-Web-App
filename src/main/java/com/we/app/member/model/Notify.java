@@ -1,7 +1,6 @@
-package com.we.app.account.model;
+package com.we.app.member.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -9,6 +8,8 @@ import javax.persistence.Embeddable;
 /** 알림방식 */
 @Embeddable
 @Getter @Setter
+@Builder
+@NoArgsConstructor @AllArgsConstructor
 public class Notify {
 
     @Column(columnDefinition = "스터디생성 시 Email알림방식 활성화 여부")

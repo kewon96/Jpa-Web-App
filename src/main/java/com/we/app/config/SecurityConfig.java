@@ -23,6 +23,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // permitAll로 인해 인증없이 쓸수 있는건 맞지만
+        // 그렇다고 해서 안전하지 않은 요청까지 받는것은 아니다
+        // 여기서 안전의 유무는 csrf token의 유무로 판단한다.
         http
                 .httpBasic().disable()
                 .csrf().disable()
@@ -30,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
 
                 .authorizeRequests()
-                .mvcMatchers("/", "/login", "/sign-up", "/check-email", "/check-email-token", "/email-login", "/check-email-login", "/login-link").permitAll()
+//                .mvcMatchers("/", "/login", "/sign-up", "/check-email", "/check-email-token", "/email-login", "/check-email-login", "/login-link").permitAll()
                 .mvcMatchers(HttpMethod.POST, "/account/**").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
                 .anyRequest()
