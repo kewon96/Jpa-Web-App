@@ -126,7 +126,7 @@ const joinMember = reactive<SignUpForm>({
 })
 
 /** 유저이름 validator */
-function validateUsername() {
+async function validateUsername() {
   const { username } = joinMember;
 
   if(!username) {
@@ -134,15 +134,15 @@ function validateUsername() {
     return;
   }
 
-  if(/^[가-힣]{2,4}|[a-zA-Z]{2,15}\s[a-zA-Z]{2,10}$/.test(username)) {
+  if(/^[가-힣]{2,4}|[a-zA-Z]{2,15}$/.test(username)) {
     validateTxt.username = '';
   } else {
     validateTxt.username = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
     return;
   }
 
-  const isDupl = http.post('/member/check/dupl/username', {username: username});
-  console.log(isDupl)
+  const isDupl = await http.post('/member/check/dupl/username', joinMember);
+
 
 }
 
@@ -164,17 +164,17 @@ function validateEmail() {
 
 /** 비밀번호 validator */
 function validatePassword() {
-  const { email } = joinMember;
+  const { password } = joinMember;
 
-  if(!email) {
-    validateTxt.email = '내용을 입력해주세요.'
+  if(!password) {
+    validateTxt.password = '내용을 입력해주세요.'
     return;
   }
 
-  if(!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/.test(email)) {
-    validateTxt.email = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+  if(!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/.test(password)) {
+    validateTxt.password = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
   } else {
-    validateTxt.email = '';
+    validateTxt.password = '';
   }
 }
 
