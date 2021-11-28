@@ -26,6 +26,12 @@ spring:
       fail_on_unknown_properties: true
   profiles:
     active: 'local'
+
 logging:
   level:
-    org.hibernate.SQL: debug # logger로 출력
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql: trace
+        SQL: debug # logger로 출력

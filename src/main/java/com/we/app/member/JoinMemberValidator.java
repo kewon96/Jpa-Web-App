@@ -27,7 +27,7 @@ public class JoinMemberValidator implements Validator {
             errors.rejectValue("email", "invalid email", new Object[]{joinMember.getEmail()}, "중복된 이메일입니다.");
         }
 
-        if(memberRepository.existsByUsername(joinMember.getEmail())) {
+        if(memberRepository.existsByUsername(joinMember.getUsername())) {
             errors.rejectValue("username", "invalid username", new Object[]{joinMember.getUsername()}, "중복된 이름입니다.");
         }
     }

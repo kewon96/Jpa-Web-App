@@ -1,5 +1,6 @@
 package com.we.app.member;
 
+import com.we.app.common.BusinessException;
 import com.we.app.member.model.ConsoleMailSender;
 import com.we.app.member.model.Member;
 import com.we.app.member.model.Notify;
@@ -16,11 +17,11 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/member")
 @RequiredArgsConstructor
 public class MemberController {
 
-    private final MemberService accountService;
+    private final MemberService memberService;
     private final JoinMemberValidator joinMemberValidator;
     private final ConsoleMailSender consoleMailSender;
 
@@ -49,7 +50,7 @@ public class MemberController {
                 .isWeb(true)
                 .build();
 
-        Member member = com.we.app.member.model.Member.builder()
+        Member member = Member.builder()
                 .email(joinMember.getEmail())
                 .username(joinMember.getUsername())
                 .password(joinMember.getPassword())
@@ -58,7 +59,7 @@ public class MemberController {
                 .studyUpdate(notify)
                 .build();
 
-        Member saveMember = accountService.signUpSubmit(member);
+        Member saveMember = memberService.signUpSubmit(member);
 
         // 이메일 인증할 때 사용할 Token 생성(저장된 회원 기준)
         saveMember.generateEmailCheckToken();
@@ -75,9 +76,9 @@ public class MemberController {
     }
 
     @PostMapping(value = "/check/dupl/username")
-    public int checkDuplUsername(@RequestBody Map<String, String> username) throws Exception {
-        System.out.println(username);
-
-        return 0;
+    public boolean checkDuplUsername(@RequestBody Member member) {
+        boolean b = memberService.existsByUsername(member);
+        System.out.println(b);
+        return b;
     }
 }

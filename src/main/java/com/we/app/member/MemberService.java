@@ -15,4 +15,8 @@ public class MemberService {
     public Member signUpSubmit(Member member) {
         return memberRepository.save(member);
     }
+
+    public boolean existsByUsername(Member member) {
+        return memberRepository.existsByUsername(member.getUsername());
+    }
 }

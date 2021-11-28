@@ -8,5 +8,5 @@ import org.springframework.transaction.annotation.Transactional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmail(String email);
 
-    boolean existsByUsername(String email);
+    boolean existsByUsername(String username);
 }

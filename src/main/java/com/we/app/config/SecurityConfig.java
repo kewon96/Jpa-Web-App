@@ -27,15 +27,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 그렇다고 해서 안전하지 않은 요청까지 받는것은 아니다
         // 여기서 안전의 유무는 csrf token의 유무로 판단한다.
         http
-                .httpBasic().disable()
+                .httpBasic()
+                .and()
                 .csrf().disable()
                 .cors()
                 .and()
 
                 .authorizeRequests()
-//                .mvcMatchers("/", "/login", "/sign-up", "/check-email", "/check-email-token", "/email-login", "/check-email-login", "/login-link").permitAll()
-                .mvcMatchers(HttpMethod.POST, "/account/**").permitAll()
-                .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
+                .mvcMatchers(HttpMethod.POST, "/member/**").permitAll()
                 .anyRequest()
                 .authenticated();
     }

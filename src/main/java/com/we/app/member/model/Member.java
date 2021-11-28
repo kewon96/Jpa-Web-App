@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
+@Entity @ToString
 @Builder @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Member {
