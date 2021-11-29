@@ -1,10 +1,9 @@
 package com.we.app.member;
 
-import com.we.app.common.BusinessException;
 import com.we.app.member.model.ConsoleMailSender;
+import com.we.app.member.model.JoinMember;
 import com.we.app.member.model.Member;
 import com.we.app.member.model.Notify;
-import com.we.app.member.model.JoinMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.util.ObjectUtils;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Map;
 
 
 @RestController
