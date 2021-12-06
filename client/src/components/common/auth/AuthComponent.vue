@@ -141,7 +141,15 @@ async function validateUsername() {
     return;
   }
 
-  const isDupl = await http.post('/member/check/dupl/username', joinMember);
+  try {
+    const isDupl = (await http.post('/member/check/dupl/username', joinMember));
+
+    if(isDupl) {
+      validateTxt.username = '사용가능한 이름입니다.';
+    }
+  } catch (e) {
+    
+  }
 
 
 }
