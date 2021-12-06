@@ -78,6 +78,7 @@ public class Member {
         return getClass().hashCode();
     }
 
+    /** Email Token 생성 */
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
     }
