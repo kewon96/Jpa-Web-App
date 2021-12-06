@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,20 @@ public class MemberService {
      */
     public boolean existsByEmail(Member member) {
         return memberRepository.existsByEmail(member.getEmail());
+    }
+
+    /**
+     * 유저생성 순서
+     * @param joinMember 입력 Member
+     * @return 최종적으로 Transaction이 끝난 Member
+     */
+    @Transactional
+    public Member processNewMember(JoinMember joinMember) {
+        Member saveMember = signUpSubmit(joinMember);
+        saveMember.generateEmailCheckToken(); // 이메일 인증할 때 사용할 Token 생성(저장된 회원 기준)
+        sendSignUpConfirmEmail(saveMember);
+
+        return saveMember;
     }
 
     /**
@@ -67,7 +82,23 @@ public class MemberService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(saveMember.getEmail());
         mailMessage.setSubject("스터디 회원가입 인증입니다.");
-        mailMessage.setText("/check-email-token?token="+ saveMember.getEmailCheckToken() +"&email=" + saveMember.getEmail());
+        mailMessage.setText("/member/check-email-token?token="+ saveMember.getEmailCheckToken() +"&email=" + saveMember.getEmail());
         consoleMailSender.send(mailMessage);
+    }
+
+    /**
+     * email을 기준으로 Member 객체 가져오기
+     * @param email 대상 email
+     * @return 가져온 객체
+     */
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
+
+    /**
+     * 몇번째 유저인지 확인
+     */
+    public long count() {
+        return memberRepository.count();
     }
 }

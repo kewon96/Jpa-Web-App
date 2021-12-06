@@ -6,7 +6,8 @@ server:
 ## database 접속 설정
 spring:
   datasource:
-    url: jdbc:postgresql://172.19.176.1:5500/jpa_web_app
+    ##172.19.176.1
+    url: jdbc:postgresql://localhost:5500/jpa_web_app
     username: admin
     password: admin
   jpa:

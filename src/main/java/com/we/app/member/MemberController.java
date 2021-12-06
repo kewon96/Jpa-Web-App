@@ -1,6 +1,7 @@
 package com.we.app.member;
 
 import com.we.app.common.BusinessException;
+import com.we.app.common.ResMap;
 import com.we.app.member.model.JoinMember;
 import com.we.app.member.model.Member;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 
 @RestController
@@ -51,10 +54,28 @@ public class MemberController {
             throw BusinessException.create("aaaaa");
         }
 
-        Member saveMember = memberService.signUpSubmit(joinMember);
-        saveMember.generateEmailCheckToken(); // 이메일 인증할 때 사용할 Token 생성(저장된 회원 기준)
-        memberService.sendSignUpConfirmEmail(saveMember);
-
+        Member saveMember = memberService.processNewMember(joinMember);
         return ObjectUtils.isEmpty(saveMember) ? 0 : 1;
+    }
+
+    @GetMapping("/check-email-token")
+    public ResMap checkEmailToken(String token, String email) {
+        Member member = memberService.findByEmail(email);
+        if(member == null) {
+            throw BusinessException.create("해당 이메일은 존재하지 않습니다.");
+        }
+
+        if( !member.getEmailCheckToken().equals(token) ) {
+            throw BusinessException.create("토큰이 같지않습니다.");
+        }
+
+        member.setEmailVerified(true);
+        member.setJoinedAt(LocalDateTime.now());
+
+        ResMap resultMap = new ResMap();
+        resultMap.put("username", member.getUsername());
+        resultMap.put("count", memberService.count());
+
+        return resultMap;
     }
 }
