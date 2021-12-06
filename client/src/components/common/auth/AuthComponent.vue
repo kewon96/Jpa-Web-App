@@ -102,10 +102,11 @@
 
 <script setup lang="ts">
 
-import {reactive, ref} from "vue";
+import {ComponentInternalInstance, getCurrentInstance, reactive, ref} from "vue";
 import http from "../../../util/http";
 import {emailReg, passwordReg, usernameReg} from "../../../util/regexp";
 
+const vm = getCurrentInstance() as ComponentInternalInstance;
 
 interface SignUpForm {
   [index: string]: string;
@@ -225,14 +226,19 @@ function isDisabled(): boolean {
   return Object.values(validateYn).some((v) => !v);
 }
 
-function signUpUser() {
-  console.log(1)
+async function signUpUser() {
+  try {
+    const isCreated = await http.post('/member/signup/submit', joinMember);
 
-  const isCreated = http.post('/member/signup/submit', joinMember);
+    if(isCreated) {
+      alert('유저생성이 완료되었습니다.');
+      vm.appContext.config.globalProperties.$router.push('/email/auth');
+    }
 
-  console.log(isCreated)
+  } finally {
+    return;
+  }
 
-  return false;
 }
 
 </script>
