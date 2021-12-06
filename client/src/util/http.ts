@@ -3,6 +3,62 @@ import {toRaw, unref} from "vue";
 
 _axios.defaults.baseURL = 'http://localhost:3030';
 
+// csrf 토큰을 담을 cookie의 이름과 header
+// 통신하는 서버의 setting과 일치해야함
+// _axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
+// _axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+
+/**
+ * _axios.interceptors.request.use(
+ *   function onFulfilled(config) {
+ *     blockOn()
+ *     const jwt = storage.get<string>(AuthKey.JWT)
+ *     if (jwt) {
+ *       config.headers.Authorization = 'Bearer ' + jwt
+ *     }
+ *     const token = storage.get<string>('token')
+ *     config.headers.token = token
+ *     return config
+ *   },
+ *   function onRejected(error) {
+ *     blockOff()
+ *     console.error('axios request error =>>', error)
+ *     return Promise.reject(error)
+ *   }
+ * )
+ * // TODO: 서버 접속 안될때처리
+ * _axios.interceptors.response.use(
+ *   function onFulfilled(response) {
+ *     blockOff()
+ *     return response
+ *   },
+ *   function onRejected(e) {
+ *     blockOff()
+ *     const msg = e?.response?.data?.message
+ *     console.error(e)
+ *     if ( e.response.data.code === 'jwt error') {
+ *       storage.remove(AuthKey.JWT)
+ *     }
+ *     if (msg.includes('오류가 발생')) {
+ *       alert(msg)
+ *     } else {
+ *       alert(msg || e)
+ *     }
+ *     return Promise.reject(e)
+ *   }
+ * )
+ */
+
+_axios.interceptors.response.use(
+    function (response) {
+        console.log(response)
+        return response.data.data;
+    },
+    function (error) {
+        alert(error.response.data.message)
+    }
+)
+
 /**
  * GET 전용 axios
  * @param url
@@ -45,6 +101,7 @@ async function post(url: string, data?: any, config?: AxiosRequestConfig) {
             result: string,
             [key: string]: any
         }>(url, plainData, config)
+
         return response.data
     } catch (e) {
         return Promise.reject(e)
