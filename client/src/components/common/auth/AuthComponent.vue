@@ -104,6 +104,8 @@
 
 import {reactive, ref} from "vue";
 import http from "../../../util/http";
+import {emailReg, passwordReg, usernameReg} from "../../../util/regexp";
+
 
 interface SignUpForm {
   [index: string]: string;
@@ -125,48 +127,71 @@ const joinMember = reactive<SignUpForm>({
   password: ''
 })
 
+const validateYn = reactive({
+  username: false,
+  email: false,
+  password: false
+})
+
 /** 유저이름 validator */
 async function validateUsername() {
   const { username } = joinMember;
 
   if(!username) {
-    validateTxt.username = '내용을 입력해주세요.'
+    validateTxt.username = '내용을 입력해주세요.';
+    validateYn.username = false;
     return;
   }
 
-  if(/^[가-힣]{2,4}|[a-zA-Z]{2,15}$/.test(username)) {
+  if(usernameReg.test(username)) {
     validateTxt.username = '';
   } else {
     validateTxt.username = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+    validateYn.username = false;
     return;
   }
 
   try {
-    const isDupl = (await http.post('/member/check/dupl/username', joinMember));
+    const isDupl = await http.post('/member/check/dupl/username', joinMember);
 
     if(isDupl) {
       validateTxt.username = '사용가능한 이름입니다.';
+      validateYn.username = true;
     }
-  } catch (e) {
-    
+  } catch (e: any) {
+    validateTxt.username = e.response.data.message;
+    validateYn.username = false;
   }
-
-
 }
 
 /** 이메일 validator */
-function validateEmail() {
+async function validateEmail() {
   const { email } = joinMember;
 
   if(!email) {
-    validateTxt.email = '내용을 입력해주세요.'
+    validateTxt.email = '내용을 입력해주세요.';
+    validateYn.email = false;
     return;
   }
 
-  if(!/^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/.test(email)) {
-    validateTxt.email = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
-  } else {
+  if(emailReg.test(email)) {
     validateTxt.email = '';
+  } else {
+    validateTxt.email = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+    validateYn.email = false;
+    return;
+  }
+
+  try {
+    const isDupl = await http.post('/member/check/dupl/email', joinMember);
+
+    if(isDupl) {
+      validateTxt.email = '사용가능한 이메일입니다.';
+      validateYn.email = true;
+    }
+  } catch (e: any) {
+    validateTxt.email = e.response.data.message;
+    validateYn.email = false;
   }
 }
 
@@ -176,13 +201,16 @@ function validatePassword() {
 
   if(!password) {
     validateTxt.password = '내용을 입력해주세요.'
+    validateYn.password = false;
     return;
   }
 
-  if(!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/.test(password)) {
+  if(!passwordReg.test(password)) {
     validateTxt.password = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+    validateYn.password = false;
   } else {
     validateTxt.password = '';
+    validateYn.password = true;
   }
 }
 
@@ -191,16 +219,20 @@ function movePage() {
   showSignUpMode.value = !showSignUpMode.value;
 }
 
-function signUpUser() {
+function isDisabled(): boolean {
+  console.log(Object.values(validateYn).some((v) => !v))
   // 한 항목이라도 안내문구가 있으면 submit 막음
-  if(Object.values(validateTxt).some((v) => v)) return false;
+  return Object.values(validateYn).some((v) => !v);
+}
+
+function signUpUser() {
+  console.log(1)
 
   const isCreated = http.post('/member/signup/submit', joinMember);
 
   console.log(isCreated)
 
   return false;
-
 }
 
 </script>

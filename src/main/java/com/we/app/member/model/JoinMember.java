@@ -17,7 +17,7 @@ public class JoinMember {
 
     @NotBlank
     @Length(min = 2, max = 10)
-    @Pattern(regexp = "^[가-힣]{2,4}|[a-zA-Z]{2,15}\\s[a-zA-Z]{2,10}$")
+    @Pattern(regexp = "^[가-힣]{2,4}|[a-zA-Z]{2,15}$")
     private String username;
 
     @NotBlank

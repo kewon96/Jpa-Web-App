@@ -1,10 +1,12 @@
 @charset "UTF-8";
-//@import './_fonts-NanumBarunGothic.scss';
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
 /********************************
 reset
 ********************************/
 
 *, *:before, *:after {
+  margin: 0;
+  padding: 0;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -92,6 +94,7 @@ input {
 
 input,
 select {
+  font-family: "Poppins", sans-serif;
   background: #fff;
   border: 1px solid #c4cdda;
   vertical-align: middle;

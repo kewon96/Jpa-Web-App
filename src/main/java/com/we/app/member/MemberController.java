@@ -27,6 +27,24 @@ public class MemberController {
         webDataBinder.addValidators(joinMemberValidator);
     }
 
+    @PostMapping(value = "/check/dupl/username")
+    public boolean checkDuplUsername(@RequestBody Member member) {
+        if(memberService.existsByUsername(member)) {
+            throw BusinessException.create("이미 존재하는 아이디입니다.");
+        }
+
+        return true;
+    }
+
+    @PostMapping(value = "/check/dupl/email")
+    public boolean checkDuplEmail(@RequestBody Member member) {
+        if(memberService.existsByEmail(member)) {
+            throw BusinessException.create("이미 존재하는 이메일입니다.");
+        }
+
+        return true;
+    }
+
     @PostMapping("/signup/submit")
     public int signUpSubmit(@RequestBody @Valid JoinMember joinMember, Errors errors) throws Exception {
         if(errors.hasErrors()) {
@@ -38,14 +56,5 @@ public class MemberController {
         memberService.sendSignUpConfirmEmail(saveMember);
 
         return ObjectUtils.isEmpty(saveMember) ? 0 : 1;
-    }
-
-    @PostMapping(value = "/check/dupl/username")
-    public boolean checkDuplUsername(@RequestBody Member member) {
-        if(memberService.existsByUsername(member)) {
-            throw BusinessException.create("이미 존재하는 아이디입니다.");
-        }
-
-        return true;
     }
 }

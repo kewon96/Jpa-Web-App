@@ -52,10 +52,11 @@ _axios.defaults.baseURL = 'http://localhost:3030';
 _axios.interceptors.response.use(
     function (response) {
         console.log(response)
-        return response.data.data;
+        return response;
     },
     function (error) {
-        alert(error.response.data.message)
+        alert(error.response.data.message);
+        return error
     }
 )
 
