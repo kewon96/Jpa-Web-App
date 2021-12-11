@@ -2,6 +2,7 @@ package com.we.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.we.app.member.model.JoinMember;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,20 @@ class AppApplicationTests {
                 )
                 .andExpect(status().isCreated())
         ;
+    }
+
+    @Test
+    void encryptor() {
+        StandardPBEStringEncryptor pbeEnc = new StandardPBEStringEncryptor();
+        pbeEnc.setAlgorithm("PBEWithMD5AndDES");
+        pbeEnc.setPassword("kewon"); //2번 설정의 암호화 키를 입력
+
+        String enc = pbeEnc.encrypt("gtrqcwfgflwogndq"); //암호화 할 내용
+        System.out.println("enc = " + enc); //암호화 한 내용을 출력
+
+        //테스트용 복호화
+        String des = pbeEnc.decrypt(enc);
+        System.out.println("des = " + des);
     }
 
 }
