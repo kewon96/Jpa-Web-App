@@ -7,9 +7,10 @@ server:
 spring:
   datasource:
     ##172.19.176.1
-    url: jdbc:postgresql://localhost:5500/jpa_web_app
-    username: admin
-    password: admin
+#    url: jdbc:postgresql://ec2-18-222-168-185.us-east-2.compute.amazonaws.com:5432/study_db
+    url: jdbc:postgresql://localhost:5432/study_db
+    username: study_admin
+    password: study_admin
   jpa:
     properties:
       hibernate:
@@ -27,6 +28,17 @@ spring:
       fail_on_unknown_properties: true
   profiles:
     active: 'local'
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ENC(6LRP8klnufj2dlTXRjeMeZH2haABDx7Mbe4rlW7CsWE=)
+    password: ENC(mynbh2y9fnpRHEHDAnH8xdIxn44t98qFSwigkQ6m484=)
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:
@@ -36,3 +48,7 @@ logging:
           descriptor:
             sql: trace
         SQL: debug # logger로 출력
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor

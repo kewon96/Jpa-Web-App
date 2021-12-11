@@ -10,6 +10,6 @@ services:
       POSTGRES_USER: "${DB_USER_ID}"
       POSTGRES_PASSWORD: "${DB_USER_PASSWORD}"
     ports:
-      - '5500:5432'
+      - '5432:5432'
     volumes:
       - ${POSTGRES_HOME_DIR}:/var/lib/postgresql/jpa_app
