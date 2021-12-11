@@ -1,6 +1,7 @@
 package com.we.app.member;
 
-import com.we.app.member.model.ConsoleMailSender;
+import com.we.app.common.mail.Mail;
+import com.we.app.common.mail.MailService;
 import com.we.app.member.model.JoinMember;
 import com.we.app.member.model.Member;
 import com.we.app.member.model.Notify;
@@ -15,8 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final ConsoleMailSender consoleMailSender;
+//    private final ConsoleMailSender consoleMailSender;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
 
     /**
@@ -46,7 +48,14 @@ public class MemberService {
     public Member processNewMember(JoinMember joinMember) {
         Member saveMember = signUpSubmit(joinMember);
         saveMember.generateEmailCheckToken(); // 이메일 인증할 때 사용할 Token 생성(저장된 회원 기준)
-        sendSignUpConfirmEmail(saveMember);
+//        sendSignUpConfirmEmail(saveMember);
+        Mail mail = Mail.builder()
+                .address("yang0184@naver.com")
+                .title("테스트입니다.")
+                .message("test")
+                .build();
+
+        mailService.sendMail(mail);
 
         return saveMember;
     }
@@ -79,11 +88,11 @@ public class MemberService {
      * @param saveMember 저장된 Member
      */
     public void sendSignUpConfirmEmail(Member saveMember) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(saveMember.getEmail());
-        mailMessage.setSubject("스터디 회원가입 인증입니다.");
-        mailMessage.setText("/member/check-email-token?token="+ saveMember.getEmailCheckToken() +"&email=" + saveMember.getEmail());
-        consoleMailSender.send(mailMessage);
+//        SimpleMailMessage mailMessage = new SimpleMailMessage();
+//        mailMessage.setTo(saveMember.getEmail());
+//        mailMessage.setSubject("스터디 회원가입 인증입니다.");
+//        mailMessage.setText("/member/check-email-token?token="+ saveMember.getEmailCheckToken() +"&email=" + saveMember.getEmail());
+//        consoleMailSender.send(mailMessage);
     }
 
     /**
