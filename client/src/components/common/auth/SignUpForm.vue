@@ -1,45 +1,57 @@
 <template>
-  <form action="#" class="sign-up-form" @submit.prevent="signUpUser">
-    <h2 class="title">Sign up</h2>
-    <div class="input-field">
-      <i class="fas fa-user"></i>
-      <input type="text" v-model="joinMember.username" @blur="validateUsername" placeholder="Username" />
-      <div></div>
-      <span>{{ validateTxt.username }}</span>
+  <div class="sign-up-form" :class="{ 'auth-mode': showAuthMode }">
+    <div class="info">
+      <h2 class="title">Sign up</h2>
+      <div class="input-field">
+        <i class="fas fa-envelope"></i>
+        <input type="email" v-model="joinMember.email" @blur="validateEmail" placeholder="Email" />
+        <div></div>
+        <span>{{ validateTxt.email }}</span>
+      </div>
+      <div class="input-field">
+        <i class="fas fa-lock"></i>
+        <input type="password" v-model="joinMember.password" @blur="validatePassword" placeholder="Password" />
+        <div></div>
+        <span>{{ validateTxt.password }}</span>
+      </div>
+      <div class="input-field">
+        <i class="fas fa-user"></i>
+        <input type="text" v-model="joinMember.username" @blur="validateUsername" placeholder="Username" />
+        <div></div>
+        <span>{{ validateTxt.username }}</span>
+      </div>
+      <input type="button" class="btn auth-btn" value="Authorization" @click="showAuthMode = !showAuthMode" />
+      <p class="social-text">Or Sign up with social platforms</p>
+      <div class="social-media">
+        <a href="#" class="social-icon">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="#" class="social-icon">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a href="#" class="social-icon">
+          <i class="fab fa-google"></i>
+        </a>
+        <a href="#" class="social-icon">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </div>
     </div>
-    <div class="input-field">
-      <i class="fas fa-envelope"></i>
-      <input type="email" v-model="joinMember.email" @blur="validateEmail" placeholder="Email" />
-      <div></div>
-      <span>{{ validateTxt.email }}</span>
+    <div class="auth">
+      <h2 class="title">Authorization</h2>
+      <div class="input-field">
+        <i class="fas fa-user"></i>
+        <input type="text" />
+        <div></div>
+        <span></span>
+      </div>
+      <input type="button" class="btn auth-btn" value="Sign up" @click="showAuthMode = !showAuthMode" />
     </div>
-    <div class="input-field">
-      <i class="fas fa-lock"></i>
-      <input type="password" v-model="joinMember.password" @blur="validatePassword" placeholder="Password" />
-      <div></div>
-      <span>{{ validateTxt.password }}</span>
-    </div>
-    <input type="submit" class="btn" value="Sign up" />
-    <p class="social-text">Or Sign up with social platforms</p>
-    <div class="social-media">
-      <a href="#" class="social-icon">
-        <i class="fab fa-facebook-f"></i>
-      </a>
-      <a href="#" class="social-icon">
-        <i class="fab fa-twitter"></i>
-      </a>
-      <a href="#" class="social-icon">
-        <i class="fab fa-google"></i>
-      </a>
-      <a href="#" class="social-icon">
-        <i class="fab fa-linkedin-in"></i>
-      </a>
-    </div>
-  </form>
+  </div>
 </template>
 
 <script setup lang="ts">
-import {ComponentInternalInstance, getCurrentInstance, reactive, ref} from "vue";
+import {ComponentInternalInstance, getCurrentInstance, onMounted, reactive, ref, watchEffect} from "vue";
 import {emailReg, passwordReg, usernameReg} from "../../../util/regexp";
 import http from "../../../util/http";
 
@@ -52,7 +64,6 @@ interface SignUpForm {
   password: string;
 }
 
-const showSignUpMode = ref<Boolean>(false);
 const validateTxt = reactive<SignUpForm>({
   username: '',
   email: '',
@@ -70,6 +81,8 @@ const validateYn = reactive({
   email: false,
   password: false
 })
+
+const showAuthMode = ref<boolean>(false);
 
 /** 유저이름 validator */
 async function validateUsername() {
@@ -152,11 +165,20 @@ function validatePassword() {
   }
 }
 
-function isDisabled(): boolean {
-  console.log(Object.values(validateYn).some((v) => !v))
-  // 한 항목이라도 안내문구가 있으면 submit 막음
-  return Object.values(validateYn).some((v) => !v);
-}
+// onMounted(() => {
+//   // onMounted hook에 도달할 땐 vnode가 있음
+//   vm.vnode.el!.querySelector('.auth-btn').disabled = true;
+// })
+//
+// watchEffect(() => {
+//   if(Object.values(validateYn).some((v) => !v)) {
+//     if(!vm.vnode.el) return;
+//
+//     vm.vnode.el.querySelector('.auth-btn').disabled = true;
+//   } else {
+//     vm.vnode.el!.querySelector('.auth-btn').disabled = false;
+//   }
+// })
 
 async function signUpUser() {
   try {
@@ -174,22 +196,27 @@ async function signUpUser() {
 }
 </script>
 
-<style scoped>
-form {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+<style lang="scss" scoped>
+
+.sign-up-form {
   padding: 0 5rem;
   transition: all 0.2s 0.7s;
   overflow: hidden;
   grid-column: 1 / 2;
   grid-row: 1 / 2;
-}
 
-form.sign-up-form {
   opacity: 0;
   z-index: 1;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  z-index: 5;
+  transition: 0.5s ease-in-out;
 }
 
 .title {
@@ -217,34 +244,34 @@ i {
   grid-template-columns: 15% 85%;
   padding: 0 1.4rem;
   position: relative;
-}
 
-.input-field i {
-  text-align: center;
-  line-height: 55px;
-  color: #acacac;
-  transition: 0.5s;
-  font-size: 1.1rem;
-}
+  i {
+    text-align: center;
+    line-height: 55px;
+    color: #acacac;
+    transition: 0.5s;
+    font-size: 1.1rem;
+  }
 
-.input-field input {
-  background: none;
-  outline: none;
-  border: none;
-  line-height: 1;
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #333;
-}
+  input {
+    background: none;
+    outline: none;
+    border: none;
+    line-height: 1;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
 
-.input-field span {
-  color: #eb8c31;
-  font-size: 12px;
-}
+    &::placeholder {
+      color: #aaa;
+      font-weight: 500;
+    }
+  }
 
-.input-field input::placeholder {
-  color: #aaa;
-  font-weight: 500;
+  span {
+    color: #eb8c31;
+    font-size: 12px;
+  }
 }
 
 .btn {
@@ -260,10 +287,14 @@ i {
   margin: 10px 0;
   cursor: pointer;
   transition: 0.5s;
-}
 
-.btn:hover {
-  background-color: #4d84e2;
+  &:hover {
+    background-color: #4d84e2;
+  }
+
+  &:disabled {
+    background-color: #5995fd78;
+  }
 }
 
 .social-text {
@@ -296,8 +327,48 @@ i {
   border-color: #4481eb;
 }
 
+.auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: absolute;
+  overflow: hidden;
+  background-color: #fff;
+  width: 81%;
+  top: 28%;
+  transition: 0.5s ease-in-out;
+
+  z-index: -1;
+  opacity: 0;
+}
+
+//.auth:before {
+//  content: "";
+//  position: absolute;
+//  top: -45%;
+//  transform: translateY(-50%);
+//
+//  width: 800px;
+//  height: 200px;
+//  transition: 0.5s ease-in-out;
+//  z-index: -1;
+//}
+
+/* ANIMATION */
+.sign-up-form.auth-mode .info {
+  opacity: 0;
+  z-index: -1;
+}
+
+.sign-up-form.auth-mode .auth {
+  opacity: 1;
+  z-index: 1;
+}
+
+
 @media (max-width: 570px) {
-  form {
+  .sign-up-form {
     padding: 0 1.5rem;
   }
 }
