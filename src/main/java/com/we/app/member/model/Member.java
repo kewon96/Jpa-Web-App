@@ -23,7 +23,7 @@ public class Member {
 
     /** 사용자이름 */
     @Column(unique = true)
-    private String username;
+    private String memberName;
 
     /** 비밀번호 */
     @Column(nullable = false)
@@ -91,10 +91,5 @@ public class Member {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    /** Email Token 생성 */
-    public void generateEmailCheckToken() {
-        this.emailCheckToken = UUID.randomUUID().toString();
     }
 }

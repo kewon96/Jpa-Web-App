@@ -49,16 +49,68 @@ _axios.defaults.baseURL = 'http://localhost:3030';
  * )
  */
 
+interface CurrentExecutingRequest extends AxiosRequestConfig {
+    [index: string]: any;
+}
+
+// https://stackoverflow.com/questions/50461746/axios-how-to-cancel-request-inside-request-interceptor-properly/67266644#67266644
+
+const currentExecutingRequests: CurrentExecutingRequest = {};
+
+_axios.interceptors.request.use(
+    (req) => {
+        let originalRequest = req;
+        const url: any = originalRequest.url;
+
+        if (currentExecutingRequests[url]) {
+            const source = currentExecutingRequests[url];
+            delete currentExecutingRequests[url];
+            source.cancel();
+        }
+
+        const CancelToken = _axios.CancelToken;
+        const source = CancelToken.source();
+        originalRequest.cancelToken = source.token;
+        currentExecutingRequests[url] = source;
+
+        // here you could add the authorization header to the request
+        return originalRequest;
+    },
+    (err) => {
+        return Promise.reject(err);
+    }
+);
+
 _axios.interceptors.response.use(
-    function (response) {
-        console.log(response)
+    (response) => {
+        if (currentExecutingRequests[response.request.responseURL]) {
+            // here you clean the request
+            delete currentExecutingRequests[response.request.responseURL];
+        }
+
         return response;
     },
-    function (error) {
-        alert(error.response.data.message);
-        return error
+    (error) => {
+        const { config } = error;
+        const originalRequest = config;
+
+        if (_axios.isCancel(error)) {
+            // here you check if this is a cancelled request to drop it silently (without error)
+            return new Promise(() => {});
+        }
+
+        if (currentExecutingRequests[originalRequest.url]) {
+            // here you clean the request
+            delete currentExecutingRequests[originalRequest.url];
+        }
+
+        // here you could check expired token and refresh it if necessary
+        throw new _axios.Cancel(error.response.data.message);
     }
-)
+);
+
+
+
 
 /**
  * GET 전용 axios
@@ -69,9 +121,8 @@ async function get(url: string, data?: any) {
     try {
         const plainData = toRaw(unref(data)) || {}
         if (plainData) {
-            // plainData.corpCd = plainData.corpCd || useAuth()?.user?.value?.corpCd
             url += '?' + Object.keys(plainData).map(function (k) {
-                return encodeURIComponent(k) + '=' + encodeURIComponent(plainData[k])
+                return encodeURIComponent(k) + '=' + encodeURI(plainData[k])
             }).join('&')
         }
 
@@ -102,6 +153,50 @@ async function post(url: string, data?: any, config?: AxiosRequestConfig) {
             result: string,
             [key: string]: any
         }>(url, plainData, config)
+
+        return response.data
+    } catch (e) {
+        return Promise.reject(e)
+    }
+}
+
+/**
+ * POST전용 axios
+ * @param url
+ * @param data
+ * @param config
+ */
+async function put(url: string, data?: any, config?: AxiosRequestConfig) {
+    try {
+        const plainData = toRaw(unref(data)) || {}
+
+        const response = await _axios.put<{
+            data: any,
+            result: string,
+            [key: string]: any
+        }>(url, plainData, config)
+
+        return response.data
+    } catch (e) {
+        return Promise.reject(e)
+    }
+}
+
+/**
+ * POST전용 axios
+ * @param url
+ * @param data
+ * @param config
+ */
+async function remove(url: string, data?: any, config?: AxiosRequestConfig) {
+    try {
+        const plainData = toRaw(unref(data)) || {}
+
+        const response = await _axios.delete<{
+            data: any,
+            result: string,
+            [key: string]: any
+        }>(url, plainData)
 
         return response.data
     } catch (e) {

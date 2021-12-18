@@ -24,11 +24,11 @@ public class JoinMemberValidator implements Validator {
         // email, username이 중복되는지 검사
         JoinMember joinMember = (JoinMember) target;
         if(memberRepository.existsByEmail(joinMember.getEmail())) {
-            errors.rejectValue("email", "invalid email", new Object[]{joinMember.getEmail()}, "중복된 이메일입니다.");
+            errors.rejectValue("email", "duplicate email", new Object[]{joinMember.getEmail()}, "중복된 이메일입니다.");
         }
 
-        if(memberRepository.existsByUsername(joinMember.getUsername())) {
-            errors.rejectValue("username", "invalid username", new Object[]{joinMember.getUsername()}, "중복된 이름입니다.");
+        if(memberRepository.existsByMemberName(joinMember.getMemberName())) {
+            errors.rejectValue("memberName", "duplicate memberName", new Object[]{joinMember.getMemberName()}, "중복된 이름입니다.");
         }
     }
 }

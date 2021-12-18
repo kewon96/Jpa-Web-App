@@ -34,12 +34,12 @@ class MemberControllerTest {
         this.mockMvc = getMockMvc();
 
         JoinMember joinMember = JoinMember.builder()
-                .username("aa")
+                .memberName("aa")
                 .email("aaa@gmail.com")
                 .password("aa")
                 .build();
 
-        mockMvc.perform(post("/account/signup/submit")
+        mockMvc.perform(post("/account/createUser")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(joinMember))
                 )

@@ -1,18 +1,17 @@
 package com.we.app.member;
 
 import com.we.app.common.BusinessException;
-import com.we.app.common.ResMap;
+import com.we.app.common.mail.Mail;
+import com.we.app.common.mail.MailService;
 import com.we.app.member.model.JoinMember;
 import com.we.app.member.model.Member;
+import com.we.app.member.model.AuthTrialEmail;
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 
 @RestController
@@ -21,61 +20,64 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MailService mailService;
     private final JoinMemberValidator joinMemberValidator;
 
 
-    @InitBinder("signUpForm") // CamelCase를 따라감
+    @InitBinder("joinMember") // CamelCase를 따라감
     public void initBinder(WebDataBinder webDataBinder) {
         // validator추가
         webDataBinder.addValidators(joinMemberValidator);
     }
 
-    @PostMapping(value = "/check/dupl/username")
-    public boolean checkDuplUsername(@RequestBody Member member) {
-        if(memberService.existsByUsername(member)) {
-            throw BusinessException.create("이미 존재하는 아이디입니다.");
+    @GetMapping(value = "/checkDuplMemberName")
+    public boolean checkDuplMemberName(@RequestParam String memberName) {
+        if(memberService.existsByMemberName(memberName)) {
+            return false;
         }
 
         return true;
     }
 
-    @PostMapping(value = "/check/dupl/email")
-    public boolean checkDuplEmail(@RequestBody Member member) {
-        if(memberService.existsByEmail(member)) {
-            throw BusinessException.create("이미 존재하는 이메일입니다.");
+    @GetMapping(value = "/checkDuplEmail")
+    public boolean checkDuplEmail(@RequestParam String email) {
+        if(memberService.existsByEmail(email)) {
+            return false;
         }
 
         return true;
     }
 
-    @PostMapping("/signup/submit")
-    public int signUpSubmit(@RequestBody @Valid JoinMember joinMember, Errors errors) throws Exception {
-        if(errors.hasErrors()) {
-            throw BusinessException.create("aaaaa");
+    @PostMapping("/createMember")
+    public String createMember(@RequestBody @Valid JoinMember joinMember, Errors errorArr) {
+        if(errorArr.hasErrors()) {
+            String firstError = errorArr.getAllErrors().get(0).getDefaultMessage();
+
+            throw BusinessException.create( firstError );
         }
 
-        Member saveMember = memberService.processNewMember(joinMember);
-        return ObjectUtils.isEmpty(saveMember) ? 0 : 1;
+        Member saveMember = memberService.createMember(joinMember);
+
+        return saveMember.getEmailCheckToken();
     }
 
-    @GetMapping("/check-email-token")
-    public ResMap checkEmailToken(String token, String email) {
-        Member member = memberService.findByEmail(email);
-        if(member == null) {
-            throw BusinessException.create("해당 이메일은 존재하지 않습니다.");
+    @PostMapping("/sendAuthenticationCode")
+    public void sendAuthenticationCode(@RequestBody Mail authMail) {
+        authMail.setTitle("이메일인증번호입니다.");
+
+        mailService.sendMail(authMail);
+    }
+
+    @PostMapping("/checkAuthCode")
+    public String checkAuthCode(@RequestBody @Valid AuthTrialEmail authTrialEmail) {
+        Member emailMatchMember = memberService.findByEmail(authTrialEmail.getTargetEmail());
+
+        if(!authTrialEmail.getCertifiedCode().equals(emailMatchMember.getEmailCheckToken())) {
+            return "인증코드가 맞지않습니다.";
         }
 
-        if( !member.getEmailCheckToken().equals(token) ) {
-            throw BusinessException.create("토큰이 같지않습니다.");
-        }
+        memberService.successAuth(emailMatchMember);
 
-        member.setEmailVerified(true);
-        member.setJoinedAt(LocalDateTime.now());
-
-        ResMap resultMap = new ResMap();
-        resultMap.put("username", member.getUsername());
-        resultMap.put("count", memberService.count());
-
-        return resultMap;
+        return "인증이 완료됐습니다";
     }
 }

@@ -1,63 +1,39 @@
 package com.we.app.member;
 
-import com.we.app.common.mail.Mail;
-import com.we.app.common.mail.MailService;
 import com.we.app.member.model.JoinMember;
 import com.we.app.member.model.Member;
 import com.we.app.member.model.Notify;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
-//    private final ConsoleMailSender consoleMailSender;
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
 
 
     /**
      * 이름 중복여부
-     * @param member 대상 Member
+     * @param memberName 대상 Member
      * @return 있으면 true, 없으면 false
      */
-    public boolean existsByUsername(Member member) {
-        return memberRepository.existsByUsername(member.getUsername());
+    public boolean existsByMemberName(String memberName) {
+        return memberRepository.existsByMemberName(memberName);
     }
 
     /**
      * 이메일 중복여부
-     * @param member 대상 Member
+     * @param email 대상 Member
      * @return 있으면 true, 없으면 false
      */
-    public boolean existsByEmail(Member member) {
-        return memberRepository.existsByEmail(member.getEmail());
-    }
-
-    /**
-     * 유저생성 순서
-     * @param joinMember 입력 Member
-     * @return 최종적으로 Transaction이 끝난 Member
-     */
-    @Transactional
-    public Member processNewMember(JoinMember joinMember) {
-        Member saveMember = signUpSubmit(joinMember);
-        saveMember.generateEmailCheckToken(); // 이메일 인증할 때 사용할 Token 생성(저장된 회원 기준)
-//        sendSignUpConfirmEmail(saveMember);
-        Mail mail = Mail.builder()
-                .address("yang0184@naver.com")
-                .title("테스트입니다.")
-                .message("test")
-                .build();
-
-        mailService.sendMail(mail);
-
-        return saveMember;
+    public boolean existsByEmail(String email) {
+        return memberRepository.existsByEmail(email);
     }
 
     /**
@@ -65,34 +41,23 @@ public class MemberService {
      * @param joinMember 입력한 member
      * @return 생성된 member
      */
-    public Member signUpSubmit(JoinMember joinMember) {
+    @Transactional
+    public Member createMember(JoinMember joinMember) {
         Notify notify = Notify.builder()
                 .isWeb(true)
                 .build();
 
         Member member = Member.builder()
                 .email(joinMember.getEmail())
-                .username(joinMember.getUsername())
+                .memberName(joinMember.getMemberName())
                 .password( passwordEncoder.encode(joinMember.getPassword()) )
+                .emailCheckToken(UUID.randomUUID().toString().substring(0, 6))
                 .studyCreate(notify)
                 .studyEnrollment(notify)
                 .studyUpdate(notify)
                 .build();
 
         return memberRepository.save(member);
-    }
-
-    /**
-     * 이메일 인증하라는 메일 전송
-     * 생성된 토큰을 인증번호로 전송
-     * @param saveMember 저장된 Member
-     */
-    public void sendSignUpConfirmEmail(Member saveMember) {
-//        SimpleMailMessage mailMessage = new SimpleMailMessage();
-//        mailMessage.setTo(saveMember.getEmail());
-//        mailMessage.setSubject("스터디 회원가입 인증입니다.");
-//        mailMessage.setText("/member/check-email-token?token="+ saveMember.getEmailCheckToken() +"&email=" + saveMember.getEmail());
-//        consoleMailSender.send(mailMessage);
     }
 
     /**
@@ -104,10 +69,10 @@ public class MemberService {
         return memberRepository.findByEmail(email);
     }
 
-    /**
-     * 몇번째 유저인지 확인
-     */
-    public long count() {
-        return memberRepository.count();
+    @Transactional
+    public void successAuth(Member successMember) {
+        successMember.setEmailVerified(true);
+
+        memberRepository.save(successMember);
     }
 }

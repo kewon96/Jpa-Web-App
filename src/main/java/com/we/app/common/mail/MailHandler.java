@@ -12,14 +12,14 @@ import java.io.IOException;
 
 public class MailHandler {
 
-    private JavaMailSender javaMailSender;
-    private MimeMessage mimeMessage;
-    private MimeMessageHelper messageHelper;
+    private final JavaMailSender javaMailSender;
+    private final MimeMessage mimeMessage;
+    private final MimeMessageHelper messageHelper;
 
     public MailHandler(JavaMailSender jSender) throws MessagingException {
         this.javaMailSender = jSender;
-        mimeMessage = jSender.createMimeMessage();
-        messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        this.mimeMessage = jSender.createMimeMessage();
+        this.messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
     }
 
     // 보내는 사람 이메일

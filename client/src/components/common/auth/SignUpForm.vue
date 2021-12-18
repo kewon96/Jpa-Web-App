@@ -4,23 +4,23 @@
       <h2 class="title">Sign up</h2>
       <div class="input-field">
         <i class="fas fa-envelope"></i>
-        <input type="email" v-model="joinMember.email" @blur="validateEmail" placeholder="Email" />
+        <input type="email" v-model="joinMember.email" @blur="validateEmail" placeholder="이메일" />
         <div></div>
         <span>{{ validateTxt.email }}</span>
       </div>
       <div class="input-field">
         <i class="fas fa-lock"></i>
-        <input type="password" v-model="joinMember.password" @blur="validatePassword" placeholder="Password" />
+        <input type="password" v-model="joinMember.password" @blur="validatePassword" placeholder="비밀번호" />
         <div></div>
         <span>{{ validateTxt.password }}</span>
       </div>
       <div class="input-field">
         <i class="fas fa-user"></i>
-        <input type="text" v-model="joinMember.username" @blur="validateUsername" placeholder="Username" />
+        <input type="text" v-model="joinMember.memberName" @blur="validateMemberName" placeholder="이름" />
         <div></div>
-        <span>{{ validateTxt.username }}</span>
+        <span>{{ validateTxt.memberName }}</span>
       </div>
-      <input type="button" class="btn auth-btn" value="Authorization" @click="showAuthMode = !showAuthMode" />
+      <input type="button" class="btn create-btn" value="Create" @click="createMember" :disabled="isInspectionCompleted" />
       <p class="social-text">Or Sign up with social platforms</p>
       <div class="social-media">
         <a href="#" class="social-icon">
@@ -41,79 +41,66 @@
       <h2 class="title">Authorization</h2>
       <div class="input-field">
         <i class="fas fa-user"></i>
-        <input type="text" />
-        <div></div>
-        <span></span>
+        <input type="text" v-model="certifiedEmail.certifiedCode" />
+        <div>{{ certifiedEmail.timer }}</div>
+        <span>{{ certifiedEmail.validTxt }}</span>
       </div>
-      <input type="button" class="btn auth-btn" value="Sign up" @click="showAuthMode = !showAuthMode" />
+      <input type="button" class="btn auth-btn" value="인증하기" @click="tryAuthenticate" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ComponentInternalInstance, getCurrentInstance, onMounted, reactive, ref, watchEffect} from "vue";
-import {emailReg, passwordReg, usernameReg} from "../../../util/regexp";
+import {ComponentInternalInstance, computed, getCurrentInstance, onMounted, reactive, ref, watchEffect} from "vue";
+import {emailReg, passwordReg, memberNameReg} from "../../../util/regexp";
 import http from "../../../util/http";
 
 const vm = getCurrentInstance() as ComponentInternalInstance;
 
 interface SignUpForm {
   [index: string]: string;
-  username: string;
+  memberName: string;
   email: string;
   password: string;
 }
 
+interface CertifiedEmail {
+  timer: string,
+  timerIntervalId: ReturnType<typeof setInterval> | null,
+  certifiedCode: string,
+  validTxt: string,
+  targetEmail: string
+}
+
 const validateTxt = reactive<SignUpForm>({
-  username: '',
+  memberName: '',
   email: '',
   password: ''
 })
 
 const joinMember = reactive<SignUpForm>({
-  username: '',
+  memberName: '',
   email: '',
   password: ''
 })
 
 const validateYn = reactive({
-  username: false,
+  memberName: false,
   email: false,
   password: false
 })
 
+const certifiedEmail = reactive<CertifiedEmail>({
+  timer: '',
+  timerIntervalId: null,
+  certifiedCode: '',
+  validTxt: '',
+  targetEmail: joinMember.email
+})
+
+const isInspectionCompleted = ref<boolean>(true);
 const showAuthMode = ref<boolean>(false);
 
-/** 유저이름 validator */
-async function validateUsername() {
-  const { username } = joinMember;
-
-  if(!username) {
-    validateTxt.username = '내용을 입력해주세요.';
-    validateYn.username = false;
-    return;
-  }
-
-  if(usernameReg.test(username)) {
-    validateTxt.username = '';
-  } else {
-    validateTxt.username = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
-    validateYn.username = false;
-    return;
-  }
-
-  try {
-    const isDupl = await http.post('/member/check/dupl/username', joinMember);
-
-    if(isDupl) {
-      validateTxt.username = '사용가능한 이름입니다.';
-      validateYn.username = true;
-    }
-  } catch (e: any) {
-    validateTxt.username = e.response.data.message;
-    validateYn.username = false;
-  }
-}
 
 /** 이메일 validator */
 async function validateEmail() {
@@ -133,16 +120,50 @@ async function validateEmail() {
     return;
   }
 
-  try {
-    const isDupl = await http.post('/member/check/dupl/email', joinMember);
+  const isNotDupl = await http.get('/member/checkDuplEmail', {email});
 
-    if(isDupl) {
-      validateTxt.email = '사용가능한 이메일입니다.';
-      validateYn.email = true;
-    }
-  } catch (e: any) {
-    validateTxt.email = e.response.data.message;
-    validateYn.email = false;
+  let txt: string;
+  if(isNotDupl) {
+    txt = '사용가능한 이메일입니다.';
+  } else {
+    txt = '이미 존재하는 이메일입니다.';
+  }
+
+  if(typeof isNotDupl === 'boolean') {
+    validateTxt.email = txt;
+    validateYn.email = isNotDupl;
+  }
+}
+
+/** 유저이름 validator */
+async function validateMemberName() {
+  const { memberName } = joinMember;
+
+  if(!memberName) {
+    validateTxt.memberName = '내용을 입력해주세요.';
+    validateYn.memberName = false;
+    return;
+  }
+
+  if(memberNameReg.test(memberName)) {
+    validateTxt.memberName = '';
+  } else {
+    validateTxt.memberName = '한글: 2~4자리, 영어: 2~15자리까지 입력가능';
+    validateYn.memberName = false;
+    return;
+  }
+  const isNotDupl = await http.get('/member/checkDuplMemberName', {memberName});
+
+  let txt: string;
+  if(isNotDupl) {
+    txt = '사용가능한 이름입니다.';
+  } else {
+    txt = '이미 존재하는 이름입니다.';
+  }
+
+  if(typeof isNotDupl === 'boolean') {
+    validateTxt.memberName = txt;
+    validateYn.memberName = isNotDupl;
   }
 }
 
@@ -165,35 +186,67 @@ function validatePassword() {
   }
 }
 
-// onMounted(() => {
-//   // onMounted hook에 도달할 땐 vnode가 있음
-//   vm.vnode.el!.querySelector('.auth-btn').disabled = true;
-// })
-//
+// 사용자생성버튼 활성화여부
+watchEffect(() => {
+  isInspectionCompleted.value = Object.values(validateYn).some(k => !k);
+})
+
+// 이메일인증버튼 활성화여부
 // watchEffect(() => {
-//   if(Object.values(validateYn).some((v) => !v)) {
+//   // 시간이 다됐으면 비활성화
+//   if(certifiedEmail.timer === '0 : 0') {
 //     if(!vm.vnode.el) return;
 //
-//     vm.vnode.el.querySelector('.auth-btn').disabled = true;
+//     vm.vnode.el!.querySelector('.create-btn').disabled = true;
 //   } else {
-//     vm.vnode.el!.querySelector('.auth-btn').disabled = false;
+//     if(certifiedEmail.certifiedCode.length !== 6) {
+//       if(!vm.vnode.el) return;
+//
+//       vm.vnode.el!.querySelector('.create-btn').disabled = true;
+//     } else {
+//       vm.vnode.el!.querySelector('.create-btn').disabled = false;
+//     }
 //   }
 // })
 
-async function signUpUser() {
-  try {
-    const isCreated = await http.post('/member/signup/submit', joinMember);
+/**
+ * 회원생성
+ * 생성 후 인증시작
+ */
+async function createMember() {
+  const authCode = await http.post('/member/createMember', joinMember);
 
-    if(isCreated) {
-      alert('유저생성이 완료되었습니다.');
-      vm.appContext.config.globalProperties.$router.push('/email/auth');
-    }
+  if(typeof authCode === 'string') {
+    startAuthenticate(authCode);
+  }
+}
 
-  } finally {
-    return;
+function startAuthenticate(authCode: string) {
+
+  const authMail = {
+    message: authCode,
+    address: joinMember.email
   }
 
+  // Then
+  http.post('/member/sendAuthenticationCode', authMail)
+
+  // 인증화면 보여지게
+  showAuthMode.value = !showAuthMode.value
 }
+
+async function tryAuthenticate() {
+  const { certifiedCode } = certifiedEmail;
+
+  const certifiedMap = {
+    certifiedCode: certifiedCode,
+    targetEmail: joinMember.email
+  }
+  const msg = await http.post('/member/checkAuthCode', certifiedMap);
+
+  console.log(msg)
+}
+
 </script>
 
 <style lang="scss" scoped>
