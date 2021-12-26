@@ -1,15 +1,15 @@
 <template>
-  <form action="#" class="sign-in-form">
+  <form action="/main" class="sign-in-form" @submit.prevent="doLogin">
     <h2 class="title">Sign in</h2>
     <div class="input-field">
       <i class="fas fa-user"></i>
-      <input type="text" placeholder="Username" />
+      <input type="text" v-model="login.memberName" placeholder="Username" />
     </div>
     <div class="input-field">
       <i class="fas fa-lock"></i>
-      <input type="password" placeholder="Password" />
+      <input type="password" v-model="login.password" placeholder="Password" />
     </div>
-    <input type="submit" value="Login" class="btn solid" />
+    <input type="submit" value="Login" class="btn solid" :disabled="isEmpty" />
     <p class="social-text">Or Sign in with social platforms</p>
     <div class="social-media">
       <a href="#" class="social-icon">
@@ -30,9 +30,38 @@
 
 <script setup lang="ts">
 
+import {reactive, ref, watchEffect} from "vue";
+import http from "../../../util/http";
+
+interface Login {
+  memberName: string,
+  password: string
+}
+
+const isEmpty = ref(true)
+
+const login = reactive<Login>({
+  memberName: '',
+  password: ''
+})
+
+// 하나라도 값이 없으면 disabled
+watchEffect(() => {
+  isEmpty.value = Object.values(login).some(k => !k);
+})
+
+
+async function doLogin() {
+  const token = await http.post('/login', login);
+
+  if(typeof token === 'string') {
+    sessionStorage.setItem("token", token);
+  }
+}
+
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 form {
   display: flex;
   align-items: center;
@@ -109,11 +138,20 @@ form.sign-in-form {
   margin: 10px 0;
   cursor: pointer;
   transition: 0.5s;
+
+  &:hover {
+     background-color: #4d84e2;
+   }
+
+  &:disabled {
+     background-color: #5995fd78;
+     cursor: default;
+   }
 }
 
-.btn:hover {
-  background-color: #4d84e2;
-}
+//.btn:hover {
+//  background-color: #4d84e2;
+//}
 
 .social-text {
   padding: 0.7rem 0;

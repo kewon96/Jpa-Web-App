@@ -191,24 +191,6 @@ watchEffect(() => {
   isInspectionCompleted.value = Object.values(validateYn).some(k => !k);
 })
 
-// 이메일인증버튼 활성화여부
-// watchEffect(() => {
-//   // 시간이 다됐으면 비활성화
-//   if(certifiedEmail.timer === '0 : 0') {
-//     if(!vm.vnode.el) return;
-//
-//     vm.vnode.el!.querySelector('.create-btn').disabled = true;
-//   } else {
-//     if(certifiedEmail.certifiedCode.length !== 6) {
-//       if(!vm.vnode.el) return;
-//
-//       vm.vnode.el!.querySelector('.create-btn').disabled = true;
-//     } else {
-//       vm.vnode.el!.querySelector('.create-btn').disabled = false;
-//     }
-//   }
-// })
-
 /**
  * 회원생성
  * 생성 후 인증시작
