@@ -19,8 +19,8 @@ public class LoginService {
 
     final String THROW_MESSAGE = "아이디와 비밀번호를 확인해주세요.";
 
-    public Member findByMatchMembername(Login login) {
-        Optional<Member> matchMembername = memberRepository.findByMemberName(login.getMemberName());
+    public Member findByMatchEmail(Login login) {
+        Optional<Member> matchMembername = memberRepository.findByEmail(login.getEmail());
 
         return matchMembername.orElseThrow(() -> {
             throw BusinessException.create(THROW_MESSAGE);

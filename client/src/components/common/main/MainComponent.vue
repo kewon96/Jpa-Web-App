@@ -19,7 +19,12 @@ onBeforeMount(async () => {
     useRouter().push('Login');
   } else {
     // 토큰있으면 검증시작
-    await http.get('/checkToken', {token})
+    // 이때 token을 header에다가 넣기위해 config에 token을 넣어준다.
+    const config = {
+      headers: { Authorization: `Bearer ${token}`}
+    }
+
+    await http.post('/checkToken', {token}, config);
   }
 })
 </script>

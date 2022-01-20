@@ -1,15 +1,15 @@
 <template>
-  <form action="/main" class="sign-in-form" @submit.prevent="doLogin">
+  <form action="/" class="sign-in-form">
     <h2 class="title">Sign in</h2>
     <div class="input-field">
       <i class="fas fa-user"></i>
-      <input type="text" v-model="login.memberName" placeholder="Username" />
+      <input type="text" v-model="login.email" placeholder="Email" />
     </div>
     <div class="input-field">
       <i class="fas fa-lock"></i>
       <input type="password" v-model="login.password" placeholder="Password" />
     </div>
-    <input type="submit" value="Login" class="btn solid" :disabled="isEmpty" />
+    <input type="button" value="Login" class="btn solid" :disabled="isEmpty" @click="doLogin" />
     <p class="social-text">Or Sign in with social platforms</p>
     <div class="social-media">
       <a href="#" class="social-icon">
@@ -34,15 +34,15 @@ import {reactive, ref, watchEffect} from "vue";
 import http from "../../../util/http";
 
 interface Login {
-  memberName: string,
+  email: string,
   password: string
 }
 
 const isEmpty = ref(true)
 
 const login = reactive<Login>({
-  memberName: '',
-  password: ''
+  email: 'yang0184@naver.com',
+  password: 'tmdgus2663'
 })
 
 // 하나라도 값이 없으면 disabled
@@ -51,11 +51,17 @@ watchEffect(() => {
 })
 
 
-async function doLogin() {
-  const token = await http.post('/login', login);
+async function doLogin(e: Event) {
+  const tokenData = await http.post('/login', login);
 
-  if(typeof token === 'string') {
+  // console.log(token)
+
+  const token = tokenData.token;
+
+  if(typeof token === 'string' && token) {
     sessionStorage.setItem("token", token);
+
+    e!.path[1].submit();
   }
 }
 

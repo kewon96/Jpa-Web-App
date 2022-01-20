@@ -4,6 +4,7 @@ import com.we.app.member.model.JoinMember;
 import com.we.app.member.model.Member;
 import com.we.app.member.model.Notify;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,8 @@ public class MemberService {
      * @return 가져온 객체
      */
     public Member findByEmail(String email) {
-        return memberRepository.findByEmail(email);
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException((email)));
     }
 
     @Transactional

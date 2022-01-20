@@ -39,6 +39,7 @@ public class MemberController {
         return true;
     }
 
+    @CrossOrigin("*")
     @GetMapping(value = "/checkDuplEmail")
     public boolean checkDuplEmail(@RequestParam String email) {
         if(memberService.existsByEmail(email)) {

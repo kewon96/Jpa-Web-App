@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 public class Login {
 
     @NotBlank
-    private String memberName;
+    private String email;
     @NotBlank
     private String password;
 

@@ -6,8 +6,6 @@ server:
 ## database 접속 설정
 spring:
   datasource:
-    ##172.19.176.1
-#    url: jdbc:postgresql://ec2-18-222-168-185.us-east-2.compute.amazonaws.com:5432/study_db
     url: jdbc:postgresql://localhost:5432/study_db
     username: study_admin
     password: study_admin
