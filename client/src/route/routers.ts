@@ -6,19 +6,15 @@ import Main from '@/components/common/main/MainComponent.vue';
 const routes = [
     {
         path: '/',
+        name: 'main',
+        component: Main
+    },
+    {
+        path: '/login',
         name: 'login',
         component: Login,
     },
-    {
-        path: '/main',
-        name: 'main',
-        component: Main
-    }
 ];
-
-function moveRoute() {
-
-}
 
 export const routers = createRouter({
     history: createWebHistory(),
